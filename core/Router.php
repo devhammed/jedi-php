@@ -33,6 +33,24 @@ class Router
     }
 
     /**
+     * Register a GET view route.
+     */
+    public function getView(string $path, string $view): self
+    {
+        return $this->view('GET', $path, $view);
+    }
+
+    /**
+     * Register a view route.
+     */
+    public function view(string $method, string $path, string $view): self
+    {
+        return $this->map($method, $path, function () use ($view) {
+            return $view;
+        });
+    }
+
+    /**
      * Register a route.
      */
     public function map(string $method, string $path, callable $handler): self

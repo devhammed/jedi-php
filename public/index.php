@@ -12,4 +12,6 @@ $app->router->get('/contact', function () {
     return '<h1>Contact Us</h1>';
 });
 
+$app->router->getView('/hi', 'Hi World');
+
 $app->run();

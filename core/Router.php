@@ -49,17 +49,17 @@ class Router
     /**
      * Execute the registered handler for the current request.
      */
-    public function resolve()
+    public function resolve(): string
     {
         $path = $this->request->getPath();
         $method = $this->request->getMethod();
 
         foreach ($this->routes as $route) {
             if ($route['path'] === $path && $route['method'] === $method) {
-                die(\call_user_func($route['handler']));
+                return \call_user_func($route['handler']);
             }
         }
 
-        die('Page Not Found');
+        return 'Page Not Found';
     }
 }

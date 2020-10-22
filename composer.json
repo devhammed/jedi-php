@@ -1,0 +1,19 @@
+{
+  "name": "devhammed/jedi-php",
+  "description": "Jedi PHP Framework",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Hammed Oyedele",
+      "email": "itz.harmid@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Jedi\\": "core/"
+    }
+  },
+  "minimum-stability": "stable",
+  "require": {}
+}

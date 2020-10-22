@@ -2,26 +2,48 @@
 
 namespace Jedi;
 
+use Closure;
+
 class Router
 {
     /**
-     * The array of registered routes.
+     * Array of registered routes.
      */
     protected array $routes = [];
 
     /**
-     * The Jedi application's request instance.
+     *  Jedi application's request instance.
      */
     protected Request $request;
 
     /**
-     * Creates a new Jedi Router instance.
-     *
-     * @param Request $request
+     * Jedi application's response instance.
      */
-    public function __construct(Request $request)
+    protected Response $response;
+
+    /**
+     * The route not found handler.
+     */
+    protected Closure $fallback;
+
+    /**
+     * Creates a new Jedi Router instance.
+     */
+    public function __construct(Request $request, Response $response)
     {
         $this->request = $request;
+        $this->response = $response;
+        $this->fallback =  fn () => 'Page Not Found';
+    }
+
+    /**
+     * Register a custom not found handler.
+     */
+    public function fallback(Closure $fallback): self
+    {
+        $this->fallback = $fallback;
+
+        return $this;
     }
 
     /**
@@ -38,6 +60,22 @@ class Router
     public function getView(string $path, string $view): self
     {
         return $this->view('GET', $path, $view);
+    }
+
+    /**
+     * Register a POST route.
+     */
+    public function post(string $path, callable $handler): self
+    {
+        return $this->map('POST', $path, $handler);
+    }
+
+    /**
+     * Register a POST view route.
+     */
+    public function postView(string $path, string $view): self
+    {
+        return $this->view('POST', $path, $view);
     }
 
     /**
@@ -78,6 +116,8 @@ class Router
             }
         }
 
-        return 'Page Not Found';
+        $this->response->setStatus($this->response::HTTP_NOT_FOUND);
+
+        return \call_user_func($this->fallback);
     }
 }

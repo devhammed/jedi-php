@@ -12,6 +12,8 @@ $app->router->get('/contact', function () {
     return '<h1>Contact Us</h1>';
 });
 
-$app->router->getView('/hi', 'Hi World');
+$app->router->fallback(function () {
+    return 'Get outta here!';
+});
 
 $app->run();

@@ -10,9 +10,14 @@ class Application
     public Router $router;
 
     /**
-     * The Jedi application's request instance.
+     * Jedi application's request instance.
      */
     protected Request $request;
+
+    /**
+     * Jedi application's response instance.
+     */
+    protected Response $response;
 
     /**
      * Creates a new Jedi application.
@@ -20,7 +25,8 @@ class Application
     public function __construct()
     {
         $this->request = new Request();
-        $this->router = new Router($this->request);
+        $this->response = new Response();
+        $this->router = new Router($this->request, $this->response);
     }
 
     /**

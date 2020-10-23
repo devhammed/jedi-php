@@ -3,6 +3,7 @@
 namespace Jedi;
 
 use Closure;
+use Throwable;
 
 class Router
 {
@@ -22,9 +23,14 @@ class Router
     protected Response $response;
 
     /**
-     * The route not found handler.
+     * The router's not found handler.
      */
     protected Closure $fallback;
+
+    /**
+     * The router's error handler.
+     */
+    protected Closure $error;
 
     /**
      * Creates a new Jedi Router instance.
@@ -33,7 +39,9 @@ class Router
     {
         $this->request = $request;
         $this->response = $response;
-        $this->fallback =  fn () => 'Page Not Found';
+        $this->fallback =  fn () => 'Page Not Found.';
+        $this->error = fn (Throwable $e) => 'Something bad just happened: ' .
+            $e->getMessage();
     }
 
     /**
@@ -42,6 +50,16 @@ class Router
     public function fallback(Closure $fallback): self
     {
         $this->fallback = $fallback;
+
+        return $this;
+    }
+
+    /**
+     * Register a custom error handler.
+     */
+    public function error(Closure $error): self
+    {
+        $this->error = $error;
 
         return $this;
     }
@@ -107,17 +125,23 @@ class Router
      */
     public function resolve(): string
     {
-        $path = $this->request->getPath();
-        $method = $this->request->getMethod();
+        try {
+            $path = $this->request->getPath();
+            $method = $this->request->getMethod();
 
-        foreach ($this->routes as $route) {
-            if ($route['path'] === $path && $route['method'] === $method) {
-                return \call_user_func($route['handler']);
+            foreach ($this->routes as $route) {
+                if ($route['path'] === $path && $route['method'] === $method) {
+                    return \call_user_func($route['handler']);
+                }
             }
+
+            $this->response->setStatus($this->response::HTTP_NOT_FOUND);
+
+            return \call_user_func($this->fallback);
+        } catch (Throwable $e) {
+            $this->response->setStatus($this->response::HTTP_INTERNAL_SERVER_ERROR);
+
+            return \call_user_func($this->error, $e);
         }
-
-        $this->response->setStatus($this->response::HTTP_NOT_FOUND);
-
-        return \call_user_func($this->fallback);
     }
 }

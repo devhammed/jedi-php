@@ -13,6 +13,7 @@ $app->router->get('/contact', function () {
 });
 
 $app->router->fallback(function () {
+    echo mysqli_init();
     return 'Get outta here!';
 });
 

@@ -10,23 +10,27 @@ class Application
     public Router $router;
 
     /**
-     * Jedi application's request instance.
+     * Jedi application's context instance.
      */
-    protected Request $request;
-
-    /**
-     * Jedi application's response instance.
-     */
-    protected Response $response;
+    protected Context $context;
 
     /**
      * Creates a new Jedi application.
      */
     public function __construct()
     {
-        $this->request = new Request();
-        $this->response = new Response();
-        $this->router = new Router($this->request, $this->response);
+        $this->context = new Context();
+        $this->router = $this->context->router;
+    }
+
+    /**
+     * Register application service.
+     */
+    public function service(string $name, $value): self
+    {
+        $this->context[$name] = $value;
+
+        return $this;
     }
 
     /**

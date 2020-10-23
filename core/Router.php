@@ -13,14 +13,9 @@ class Router
     protected array $routes = [];
 
     /**
-     *  Jedi application's request instance.
+     * Jedi application's context.
      */
-    protected Request $request;
-
-    /**
-     * Jedi application's response instance.
-     */
-    protected Response $response;
+    protected Context $context;
 
     /**
      * The router's not found handler.
@@ -35,10 +30,9 @@ class Router
     /**
      * Creates a new Jedi Router instance.
      */
-    public function __construct(Request $request, Response $response)
+    public function __construct(Context $context)
     {
-        $this->request = $request;
-        $this->response = $response;
+        $this->context = $context;
         $this->fallback =  fn () => 'Page Not Found.';
         $this->error = fn (Throwable $e) => 'Something bad just happened: ' .
             $e->getMessage();
@@ -121,25 +115,69 @@ class Router
     }
 
     /**
+     * Get route methods.
+     */
+    protected function getRouteMethods(string $method): array
+    {
+        return \array_map(
+            'trim',
+            \array_map(
+                'strtoupper',
+                \explode('|', $method),
+            ),
+        );
+    }
+
+    /**
+     * Generate regular expressions from route path.
+     */
+    protected function pathToRegex(string $path): string
+    {
+        return \preg_replace_callback(
+            '#:([\w]+)(\(([^/()]*)\))?#',
+            function ($matches) {
+                return isset($matches[3])
+                    ? '(?P<' . $matches[1] . '>' . $matches[3] . ')'
+                    : '(?P<' . $matches[1] . '>[^/]+)';
+            },
+            '~^' . $path . '/?$~',
+        );
+    }
+
+    /**
      * Execute the registered handler for the current request.
      */
     public function resolve(): string
     {
         try {
-            $path = $this->request->getPath();
-            $method = $this->request->getMethod();
+            $requestPath = $this->context->request->getPath();
+            $requestMethod = $this->context->request->getMethod();
 
             foreach ($this->routes as $route) {
-                if ($route['path'] === $path && $route['method'] === $method) {
-                    return \call_user_func($route['handler']);
+                $routePath = $this->pathToRegex($route['path']);
+                $routeMethod = $this->getRouteMethods($route['method']);
+
+                if (
+                    \preg_match($routePath, $requestPath, $args) &&
+                    \in_array($requestMethod, $routeMethod)
+                ) {
+                    \array_shift($args);
+
+                    $this->context->args->setArgs($args);
+
+                    return \call_user_func($route['handler'], $this->context);
                 }
             }
 
-            $this->response->setStatus($this->response::HTTP_NOT_FOUND);
+            $this->context
+                ->response
+                ->setStatus($this->context->response::HTTP_NOT_FOUND);
 
             return \call_user_func($this->fallback);
         } catch (Throwable $e) {
-            $this->response->setStatus($this->response::HTTP_INTERNAL_SERVER_ERROR);
+            $this->context
+                ->response
+                ->setStatus($this->context->response::HTTP_INTERNAL_SERVER_ERROR);
 
             return \call_user_func($this->error, $e);
         }

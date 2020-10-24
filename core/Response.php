@@ -2,6 +2,7 @@
 
 namespace Jedi;
 
+use Throwable;
 use Jedi\Response\TransformedResponse;
 
 class Response
@@ -14,44 +15,96 @@ class Response
     public const HTTP_INTERNAL_SERVER_ERROR = 500;
 
     /**
+     * Set a response header.
+     */
+    public function header(string $key, string $value, bool $replace = \true): void
+    {
+        if (!\headers_sent()) {
+            \header($key . ': ' . $value, $replace);
+        }
+    }
+
+    /**
+     * Send a redirect response.
+     */
+    public function redirect(string $url): void
+    {
+        $this->header('Location', $url);
+    }
+
+    /**
+     * Go back to the referring page.
+     */
+    public function back(): void
+    {
+        $this->redirect(
+            isset($_SERVER['HTTP_REFERER'])
+                ? $_SERVER['HTTP_REFERER']
+                : '#'
+        );
+    }
+
+    /**
      * Set response status code.
      */
-    public function setStatus(int $code)
+    public function status(int $code): void
     {
         \http_response_code($code);
     }
 
-    public function addHeader(string $str, int $code = \null)
+    /**
+     * Set the response type.
+     */
+    public function type(string $type): void
     {
-        if (!\headers_sent()) {
-            \header($str, true, $code);
+        $this->header('Content-Type', $type);
+    }
+
+    /**
+     * Send a generic response.
+     */
+    public function send($response): TransformedResponse
+    {
+        try {
+            // Check if data has been transformed...
+            if ($response instanceof TransformedResponse) {
+                return $response;
+            }
+
+            // Handle arrays...
+            if (\is_array($response)) {
+                return $this->json($response);
+            }
+
+            // Handle plain types like strings, numbers, floats etc.
+            if (!\preg_match('~<\/?[a-z][\s\S]*>~', $response)) {
+                return $this->text($response);
+            }
+
+            // Handle HTML, binary file etc.
+            return new TransformedResponse($response);
+        } catch (Throwable $e) {
+            // The flow will only get here if:
+            //    1. preg_match fails
+            // it is 100% safe to just return the response:
+
+            return new TransformedResponse($response);
         }
     }
 
-    public function redirect(string $url)
-    {
-        $this->addHeader('Location: ' . $url);
-    }
-
-    public function back()
-    {
-        $ref = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '#';
-        $this->redirect($ref);
-    }
-
-    public function type(string $type)
-    {
-        $this->addHeader('Content-Type: ' . $type);
-    }
-
-
-    public function text(string $text)
+    /**
+     * Send a plain text response.
+     */
+    public function text($text): TransformedResponse
     {
         $this->type('text/plain');
 
         return new TransformedResponse($text);
     }
 
+    /**
+     * Send a JSON response.
+     */
     public function json($data): TransformedResponse
     {
         $this->type('application/json');
@@ -59,7 +112,10 @@ class Response
         return new TransformedResponse(\json_encode($data));
     }
 
-    public function jsonp($data, string $func = 'callback')
+    /**
+     * Send a JSONP response.
+     */
+    public function jsonp($data, string $func = 'callback'): TransformedResponse
     {
         if (!isset($_GET[$func])) {
             return 'No JSONP Callback `' . $func . '`';

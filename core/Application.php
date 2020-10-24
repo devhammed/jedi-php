@@ -158,40 +158,7 @@ class Application
      */
     public function run()
     {
-        $response = $this->handleRequest();
-
-        if ($response instanceof TransformedResponse) {
-            echo $response;
-        } else {
-            echo $this->transformResponse($response);
-        }
-    }
-
-    /**
-     * Transform about to be sent out response.
-     */
-    protected function transformResponse($response): TransformedResponse
-    {
-        try {
-            // Handle arrays:
-            if (\is_array($response)) {
-                return $this->context->response->json($response);
-            }
-
-            // Handle plain types like strings, numbers, floats and others:
-            if (!\preg_match('~<\/?[a-z][\s\S]*>~', $response)) {
-                return $this->context->response->text($response);
-            }
-
-            // Resorts back to HTML response:
-            return $response;
-        } catch (Throwable $e) {
-            // The flow will only get here if:
-            //    1. preg_match fails
-            // it is 100% safe to just return the response:
-
-            return new TransformedResponse($response);
-        }
+        echo $this->context->response->send($this->handleRequest());
     }
 
     /**
@@ -224,13 +191,13 @@ class Application
 
             $this->context
                 ->response
-                ->setStatus($this->context->response::HTTP_NOT_FOUND);
+                ->status($this->context->response::HTTP_NOT_FOUND);
 
             return \call_user_func($this->fallback);
         } catch (Throwable $e) {
             $this->context
                 ->response
-                ->setStatus($this->context->response::HTTP_INTERNAL_SERVER_ERROR);
+                ->status($this->context->response::HTTP_INTERNAL_SERVER_ERROR);
 
             return \call_user_func($this->error, $e);
         }

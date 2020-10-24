@@ -2,26 +2,25 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Jedi\Context;
 use Jedi\Application;
 
 $app = new Application();
 
 $app->group('/api', function () use ($app) {
-    $app->get('/', function (Context $context) {
-        return $context->response->json([
+    $app->get('/', function () {
+        return [
             'ok' => true,
-            'message' => 'Welcome to our API'
-        ]);
+            'message' => 'Welcome to our API.',
+        ];
     });
 
     $app->group('/users', function () use ($app) {
-        $app->get('/', function (Context $context) {
-            return $context->response->json([1, 2, 3]);
+        $app->get('/', function () {
+            return [1, 2, 3];
         });
 
-        $app->get('/:user(\d+)', function (Context $context) {
-            return [1, 2, 3];
+        $app->get('/:user(\d+)', function () {
+            return 1;
         });
     });
 });

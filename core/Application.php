@@ -165,15 +165,19 @@ class Application
      */
     protected function transformResponse($response): string
     {
-        if (\is_array($response)) {
-            return $this->context->response->json($response);
-        }
+        try {
+            if (\is_array($response)) {
+                return $this->context->response->json($response);
+            }
 
-        if (\is_string($response) && !\preg_match('~<\/?[a-z][\s\S]*>~', $response)) {
-            return $this->context->response->text($response);
-        }
+            if (!\preg_match('~<\/?[a-z][\s\S]*>~', $response)) {
+                return $this->context->response->text($response);
+            }
 
-        return $response;
+            return $response;
+        } catch (Throwable $e) {
+            return $response;
+        }
     }
 
     /**

@@ -7,6 +7,17 @@ use Jedi\Application;
 
 $app = new Application();
 
+$app->use(function (Context $context, Closure $next) {
+    try {
+        return $next($context);
+    } catch (Throwable $e) {
+        return $context->res->status(500)->send([
+            'ok' => \false,
+            'message' => 'Something bad just happened.',
+        ]);
+    }
+});
+
 $app->group('/api', function () use ($app) {
     $app->get('/', function () {
         return [
@@ -27,7 +38,8 @@ $app->group('/api', function () use ($app) {
 });
 
 $app->get('/', function () {
-    return 'Hello World!';
+    throw new Error('dd');
+    return 'f';
 });
 
 $app->get('/contact', function () {

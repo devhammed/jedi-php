@@ -3,9 +3,7 @@
 namespace Jedi;
 
 use Closure;
-use Throwable;
 use Jedi\Traits\HasMiddlewares;
-use Jedi\Response\TransformedResponse;
 
 class Application
 {
@@ -29,11 +27,6 @@ class Application
     protected Closure $fallback;
 
     /**
-     * The router's error handler.
-     */
-    protected Closure $error;
-
-    /**
      * The routes base path.
      */
     protected string $base = '';
@@ -45,8 +38,6 @@ class Application
     {
         $this->context = new Context($this);
         $this->fallback =  fn () => 'Page Not Found.';
-        $this->error = fn (Throwable $e) => 'Something bad just happened: ' .
-            $e->getMessage();
     }
 
     /**
@@ -65,16 +56,6 @@ class Application
     public function fallback(Closure $fallback): self
     {
         $this->fallback = $fallback;
-
-        return $this;
-    }
-
-    /**
-     * Register a custom error handler.
-     */
-    public function error(Closure $error): self
-    {
-        $this->error = $error;
 
         return $this;
     }
@@ -166,40 +147,32 @@ class Application
      */
     protected function handleRequest()
     {
-        try {
-            $requestPath = $this->context->request->getPath();
-            $requestMethod = $this->context->request->getMethod();
+        $requestPath = $this->context->request->getPath();
+        $requestMethod = $this->context->request->getMethod();
 
-            foreach ($this->routes as $route) {
-                if (
-                    \preg_match($route->getPath(), $requestPath, $args) &&
-                    \in_array($requestMethod, $route->getMethods())
-                ) {
-                    \array_shift($args);
+        foreach ($this->routes as $route) {
+            if (
+                \preg_match($route->getPath(), $requestPath, $args) &&
+                \in_array($requestMethod, $route->getMethods())
+            ) {
+                \array_shift($args);
 
-                    $this->context->args->setArgs($args);
+                $this->context->args->setArgs($args);
 
-                    return \call_user_func(
-                        $this->getFinalHandler(
-                            $route->getMiddlewares(),
-                            $route->getHandler(),
-                        ),
-                        $this->context,
-                    );
-                }
+                return \call_user_func(
+                    $this->getFinalHandler(
+                        $route->getMiddlewares(),
+                        $route->getHandler(),
+                    ),
+                    $this->context,
+                );
             }
-
-            $this->context
-                ->response
-                ->status($this->context->response::HTTP_NOT_FOUND);
-
-            return \call_user_func($this->fallback);
-        } catch (Throwable $e) {
-            $this->context
-                ->response
-                ->status($this->context->response::HTTP_INTERNAL_SERVER_ERROR);
-
-            return \call_user_func($this->error, $e);
         }
+
+        $this->context
+            ->response
+            ->status($this->context->response::HTTP_NOT_FOUND);
+
+        return \call_user_func($this->fallback);
     }
 }

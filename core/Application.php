@@ -33,6 +33,11 @@ class Application
     protected Closure $error;
 
     /**
+     * The routes base path.
+     */
+    protected string $base = '';
+
+    /**
      * Creates a new Jedi application.
      */
     public function __construct()
@@ -106,6 +111,22 @@ class Application
     }
 
     /**
+     * Create a route group.
+     */
+    public function group(string $base, callable $registrar)
+    {
+        $oldBase = $this->base;
+        $oldMiddlewares = $this->middlewares;
+
+        $this->base = $oldBase . $base;
+
+        \call_user_func($registrar, $this);
+
+        $this->base = $oldBase;
+        $this->middlewares = $oldMiddlewares;
+    }
+
+    /**
      * Register a view route.
      */
     public function view(string $method, string $path, string $view): Route
@@ -120,6 +141,8 @@ class Application
      */
     public function map(string $method, string $path, callable $handler): Route
     {
+        $path = $this->base . ($path === '/' ? '' : $path);
+
         $route = new Route($method, $path, $handler);
 
         $route->use($this->middlewares);

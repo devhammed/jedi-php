@@ -7,12 +7,23 @@ use Jedi\Application;
 
 $app = new Application();
 
-$app->use(function (Context $ctx, callable $next) {
-    echo 'start<br />';
+$app->group('/api', function () use ($app) {
+    $app->get('/', function (Context $context) {
+        return $context->response->json([
+            'ok' => true,
+            'message' => 'Welcome to our API'
+        ]);
+    });
 
-    echo $next($ctx) . '<br/>';
+    $app->group('/users', function () use ($app) {
+        $app->get('/', function (Context $context) {
+            return $context->response->json([1, 2, 3]);
+        });
 
-    echo 'end<br/>';
+        $app->get('/:user(\d+)', function (Context $context) {
+            return [1, 2, 3];
+        });
+    });
 });
 
 $app->get('/', function () {
@@ -21,14 +32,6 @@ $app->get('/', function () {
 
 $app->get('/contact', function () {
     return '<h1>Contact Us</h1>';
-});
-
-$app->get('/users', function (Context $context) {
-    return $context->response->jsonp([1, 2, 3]);
-});
-
-$app->get('/users(/:user(\d+))?', function (Context $context) {
-    return '<h1>Hello ' . $context->args->user . '</h1>';
 });
 
 $app->fallback(function () {

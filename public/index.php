@@ -55,13 +55,7 @@ $app->group('/api', function () use ($app) {
     });
 
     $app->group('/users', function () use ($app) {
-        $app->get('/', function () {
-            return [1, 2, 3];
-        });
-
-        $app->get('/:user(\d+)', function (Context $context) {
-            return $context->args->user;
-        });
+        include_once(__DIR__ . '/../routes/users.php');
     });
 });
 

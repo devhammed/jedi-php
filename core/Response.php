@@ -42,6 +42,14 @@ class Response
         $this->addHeader('Content-Type: ' . $type);
     }
 
+
+    public function text(string $text)
+    {
+        $this->type('text/plain');
+
+        return $text;
+    }
+
     public function json($data)
     {
         $this->type('application/json');

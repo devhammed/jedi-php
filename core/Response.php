@@ -73,8 +73,12 @@ class Response
     /**
      * Send a generic response.
      */
-    public function send($response): TransformedResponse
+    public function send($response, int $status = \null): TransformedResponse
     {
+        if ($status !== \null) {
+            $this->status($status);
+        }
+
         try {
             // Check if data has been transformed...
             if ($response instanceof TransformedResponse) {

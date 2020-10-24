@@ -166,16 +166,23 @@ class Application
     protected function transformResponse($response): string
     {
         try {
+            // Handle arrays:
             if (\is_array($response)) {
                 return $this->context->response->json($response);
             }
 
+            // Handle plain types like strings, numbers, floats and others:
             if (!\preg_match('~<\/?[a-z][\s\S]*>~', $response)) {
                 return $this->context->response->text($response);
             }
 
+            // Resorts back to HTML response:
             return $response;
         } catch (Throwable $e) {
+            // The flow will only get here if:
+            //    1. preg_match fails
+            // it is 100% safe to just return the response:
+
             return $response;
         }
     }

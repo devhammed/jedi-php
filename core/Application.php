@@ -157,15 +157,19 @@ class Application
      */
     public function run()
     {
-        try {
-            echo $this->handleRequest();
-        } catch (Throwable $e) {
-            $this->context
-                ->response
-                ->setStatus($this->context->response::HTTP_INTERNAL_SERVER_ERROR);
+        echo $this->transformResponse($this->handleRequest());
+    }
 
-            return \call_user_func($this->error, $e);
+    /**
+     * Transform about to be sent out response.
+     */
+    protected function transformResponse($response): string
+    {
+        if (\is_array($response)) {
+            return $this->context->response->json($response);
         }
+
+        return $response;
     }
 
     /**
@@ -173,32 +177,40 @@ class Application
      */
     protected function handleRequest()
     {
-        $requestPath = $this->context->request->getPath();
-        $requestMethod = $this->context->request->getMethod();
+        try {
+            $requestPath = $this->context->request->getPath();
+            $requestMethod = $this->context->request->getMethod();
 
-        foreach ($this->routes as $route) {
-            if (
-                \preg_match($route->getPath(), $requestPath, $args) &&
-                \in_array($requestMethod, $route->getMethods())
-            ) {
-                \array_shift($args);
+            foreach ($this->routes as $route) {
+                if (
+                    \preg_match($route->getPath(), $requestPath, $args) &&
+                    \in_array($requestMethod, $route->getMethods())
+                ) {
+                    \array_shift($args);
 
-                $this->context->args->setArgs($args);
+                    $this->context->args->setArgs($args);
 
-                return \call_user_func(
-                    $this->getFinalHandler(
-                        $route->getMiddlewares(),
-                        $route->getHandler(),
-                    ),
-                    $this->context,
-                );
+                    return \call_user_func(
+                        $this->getFinalHandler(
+                            $route->getMiddlewares(),
+                            $route->getHandler(),
+                        ),
+                        $this->context,
+                    );
+                }
             }
+
+            $this->context
+                ->response
+                ->setStatus($this->context->response::HTTP_NOT_FOUND);
+
+            return \call_user_func($this->fallback);
+        } catch (Throwable $e) {
+            $this->context
+                ->response
+                ->setStatus($this->context->response::HTTP_INTERNAL_SERVER_ERROR);
+
+            return \call_user_func($this->error, $e);
         }
-
-        $this->context
-            ->response
-            ->setStatus($this->context->response::HTTP_NOT_FOUND);
-
-        return \call_user_func($this->fallback);
     }
 }

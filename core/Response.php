@@ -17,47 +17,57 @@ class Response
     /**
      * Set a response header.
      */
-    public function header(string $key, string $value, bool $replace = \true): void
+    public function header(string $key, string $value, bool $replace = \true): self
     {
         if (!\headers_sent()) {
             \header($key . ': ' . $value, $replace);
         }
+
+        return $this;
     }
 
     /**
      * Send a redirect response.
      */
-    public function redirect(string $url): void
+    public function redirect(string $url): self
     {
         $this->header('Location', $url);
+
+        return $this;
     }
 
     /**
      * Go back to the referring page.
      */
-    public function back(): void
+    public function back(): self
     {
         $this->redirect(
             isset($_SERVER['HTTP_REFERER'])
                 ? $_SERVER['HTTP_REFERER']
                 : '#'
         );
+
+        return $this;
     }
 
     /**
      * Set response status code.
      */
-    public function status(int $code): void
+    public function status(int $code): self
     {
         \http_response_code($code);
+
+        return $this;
     }
 
     /**
      * Set the response type.
      */
-    public function type(string $type): void
+    public function type(string $type): self
     {
         $this->header('Content-Type', $type);
+
+        return $this;
     }
 
     /**

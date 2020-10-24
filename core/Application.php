@@ -169,6 +169,10 @@ class Application
             return $this->context->response->json($response);
         }
 
+        if (\is_string($response) && !\preg_match('~<\/?[a-z][\s\S]*>~', $response)) {
+            return $this->context->response->text($response);
+        }
+
         return $response;
     }
 

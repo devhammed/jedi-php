@@ -7,27 +7,31 @@ use Jedi\Application;
 
 $app = new Application();
 
-$app->service('hello', function (Context $context) {
-    return $context->request->getMethod();
+$app->use(function (Context $ctx, callable $next) {
+    echo 'start<br />';
+
+    echo $next($ctx) . '<br/>';
+
+    echo 'end<br/>';
 });
 
-$app->router->get('/', function (Context $context) {
-    return $context->hello;
+$app->get('/', function () {
+    return 'Hello World!';
 });
 
-$app->router->get('/contact', function () {
+$app->get('/contact', function () {
     return '<h1>Contact Us</h1>';
 });
 
-$app->router->get('/users', function (Context $context) {
+$app->get('/users', function (Context $context) {
     return $context->response->jsonp([1, 2, 3]);
 });
 
-$app->router->get('/users(/:user(\d+))?', function (Context $context) {
+$app->get('/users(/:user(\d+))?', function (Context $context) {
     return '<h1>Hello ' . $context->args->user . '</h1>';
 });
 
-$app->router->fallback(function () {
+$app->fallback(function () {
     return 'Get outta here!';
 });
 

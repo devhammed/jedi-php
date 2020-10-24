@@ -8,6 +8,7 @@ use Jedi\Exceptions\Context\NotFoundException;
 /**
  * Context Class
  *
+ * @property-read \Jedi\Application $app
  * @property-read \Jedi\Router $router
  * @property-read \Jedi\Arguments $args
  * @property-read \Jedi\Request $request
@@ -33,12 +34,12 @@ class Context implements ArrayAccess
     /**
      * Creates a new application context.
      */
-    public function __construct()
+    public function __construct(Application $application)
     {
+        $this->container['app'] = $application;
         $this->container['args'] = new Arguments();
         $this->container['request'] = new Request();
         $this->container['response'] = new Response();
-        $this->container['router'] = new Router($this);
     }
 
     /**

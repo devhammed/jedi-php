@@ -13,6 +13,8 @@ use Jedi\Exceptions\Context\NotFoundException;
  * @property-read \Jedi\Arguments $args
  * @property-read \Jedi\Request $request
  * @property-read \Jedi\Response $response
+ * @property-read \Jedi\Request $req
+ * @property-read \Jedi\Response $res
  */
 class Context implements ArrayAccess
 {
@@ -25,6 +27,9 @@ class Context implements ArrayAccess
      * Builtin services.
      */
     private array $builtin = [
+        'app',
+        'res',
+        'req',
         'args',
         'router',
         'request',
@@ -40,6 +45,8 @@ class Context implements ArrayAccess
         $this->container['args'] = new Arguments();
         $this->container['request'] = new Request();
         $this->container['response'] = new Response();
+        $this->container['req'] = $this->container['request'];
+        $this->container['res'] = $this->container['response'];
     }
 
     /**

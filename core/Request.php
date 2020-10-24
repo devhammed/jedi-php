@@ -44,13 +44,89 @@ class Request
     }
 
     /**
-     * Returns POST value.
+     * Returns PUT value.
+     */
+    public function put(?string $key, $def = \null): ?string
+    {
+        return $this->method('PUT') ? $this->raw($key) : $def;
+    }
+
+    /**
+     * Returns PATCH value.
+     */
+    public function patch(?string $key, $def = \null): ?string
+    {
+        return $this->method('PATCH') ? $this->raw($key) : $def;
+    }
+
+    /**
+     * Returns DELETE value.
+     */
+    public function delete(?string $key, $def = \null): ?string
+    {
+        return $this->method('DELETE') ? $this->raw($key) : $def;
+    }
+
+    /**
+     * Returns raw request value.
+     */
+    public function raw(?string $key = null, $def = null): ?string
+    {
+        $input = \file_get_contents('php://input');
+
+        if (\is_null($key)) {
+            return $input;
+        }
+
+        \parse_str($input, $rawBody);
+
+        return isset($rawBody[$key]) ? $rawBody[$key] : $def;
+    }
+
+    /**
+     * Returns SERVER value.
      */
     public function server(string $key, ?string $def = \null): ?string
     {
         $key = strtoupper($key);
 
         return isset($this->server[$key]) ? $this->server[$key] : $def;
+    }
+
+    /**
+     * Returns value from either GET, POST, PUT, PATCH, DELETE, SERVER and RAW (in that order, first to match).
+     */
+    public function input(?string $key, $def = \null): ?string
+    {
+        if (($v = $this->get($key, $def))) {
+            return $v;
+        }
+
+        if (($v = $this->post($key, $def))) {
+            return $v;
+        }
+
+        if (($v = $this->put($key, $def))) {
+            return $v;
+        }
+
+        if (($v = $this->put($key, $def))) {
+            return $v;
+        }
+
+        if (($v = $this->patch($key, $def))) {
+            return $v;
+        }
+
+        if (($v = $this->delete($key, $def))) {
+            return $v;
+        }
+
+        if (($v = $this->server($key, $def))) {
+            return $v;
+        }
+
+        return $this->raw($key, $def);
     }
 
     /**

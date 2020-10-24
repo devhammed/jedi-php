@@ -23,6 +23,10 @@ $app->get('/', function () {
     return '<h1>Home Page</h1>';
 });
 
+$app->map('ANY', '/input', function (Context $context) {
+    return '<h1>Input: </h1>' . $context->req->input('h');
+});
+
 // Sample group routes
 $app->group('/api', function () use ($app) {
     // Sample middleware for groups

@@ -125,6 +125,8 @@ class Application
     {
         $path = $this->base . ($path === '/' ? '' : $path);
 
+        $method = $method === 'GET' ? 'GET|HEAD' : $method;
+
         $route = new Route($method, $path, $handler);
 
         $route->use($this->middlewares);
@@ -151,9 +153,12 @@ class Application
         $requestMethod = $this->context->request->method();
 
         foreach ($this->routes as $route) {
+            $routeMethods = $route->getMethods();
+            $matchedMethod = \in_array('ANY', $routeMethods) || \in_array($requestMethod, $routeMethods);
+
             if (
-                \preg_match($route->getPath(), $requestPath, $args) &&
-                \in_array($requestMethod, $route->getMethods())
+                $matchedMethod &&
+                \preg_match($route->getPath(), $requestPath, $args)
             ) {
                 \array_shift($args);
 

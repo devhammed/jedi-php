@@ -32,11 +32,11 @@ trait HasMiddlewares
             return $this;
         }
 
-        throw new InvalidArgumentException('middleware is not of callable type');
+        throw new InvalidArgumentException('middleware is not of callable type.');
     }
 
     /**
-     * Get the final handler  function that will curry the middlewares and main handler.
+     * Get the final handler function that will curry the middlewares and main handler.
      */
     protected function getFinalHandler(
         array $middlewares,

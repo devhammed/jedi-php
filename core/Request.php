@@ -9,8 +9,9 @@ class Request
      */
     protected array $get;
     protected array $post;
-    protected array $server;
+    protected string $uri;
     protected array $files;
+    protected array $server;
     protected array $headers;
 
     /**
@@ -23,6 +24,7 @@ class Request
         $this->files = $_FILES;
         $this->server = $_SERVER;
         $this->headers = $this->getRequestHeaders();
+        $this->uri = \strtok($this->server['REQUEST_URI'], '?');
     }
 
     /**
@@ -56,13 +58,13 @@ class Request
      *
      * @return string
      */
-    public function path(): string
+    public function uri(): string
     {
-        return \strtok($_SERVER['REQUEST_URI'], '?');
+        return $this->uri;
     }
 
     /**
-     * Get the current request URL.
+     * Get the current request URL or appended path.
      */
     public function url(?string $str = \null): string
     {

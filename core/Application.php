@@ -147,7 +147,7 @@ class Application
      */
     protected function handleRequest()
     {
-        $requestPath = $this->context->request->path();
+        $requestPath = $this->context->request->uri();
         $requestMethod = $this->context->request->method();
 
         foreach ($this->routes as $route) {

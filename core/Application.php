@@ -5,6 +5,7 @@ namespace Jedi;
 use Closure;
 use Throwable;
 use Jedi\Traits\HasMiddlewares;
+use Jedi\Response\TransformedResponse;
 
 class Application
 {
@@ -157,13 +158,19 @@ class Application
      */
     public function run()
     {
-        echo $this->transformResponse($this->handleRequest());
+        $response = $this->handleRequest();
+
+        if ($response instanceof TransformedResponse) {
+            echo $response;
+        } else {
+            echo $this->transformResponse($response);
+        }
     }
 
     /**
      * Transform about to be sent out response.
      */
-    protected function transformResponse($response): string
+    protected function transformResponse($response): TransformedResponse
     {
         try {
             // Handle arrays:
@@ -183,7 +190,7 @@ class Application
             //    1. preg_match fails
             // it is 100% safe to just return the response:
 
-            return $response;
+            return new TransformedResponse($response);
         }
     }
 

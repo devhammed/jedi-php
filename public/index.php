@@ -2,6 +2,7 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
+use Jedi\Context;
 use Jedi\Application;
 
 $app = new Application();
@@ -19,8 +20,8 @@ $app->group('/api', function () use ($app) {
             return [1, 2, 3];
         });
 
-        $app->get('/:user(\d+)', function () {
-            return 1;
+        $app->get('/:user(\d+)', function (Context $context) {
+            return $context->args->user;
         });
     });
 });

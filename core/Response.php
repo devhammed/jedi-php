@@ -2,6 +2,8 @@
 
 namespace Jedi;
 
+use Jedi\Response\TransformedResponse;
+
 class Response
 {
     /**
@@ -47,14 +49,14 @@ class Response
     {
         $this->type('text/plain');
 
-        return $text;
+        return new TransformedResponse($text);
     }
 
-    public function json($data)
+    public function json($data): TransformedResponse
     {
         $this->type('application/json');
 
-        return \json_encode($data);
+        return new TransformedResponse(\json_encode($data));
     }
 
     public function jsonp($data, string $func = 'callback')
@@ -68,6 +70,6 @@ class Response
 
         $this->type('text/javascript');
 
-        return '/**/ typeof ' . $func . ' === "function" && ' . $func . '(' . $data  . ');';
+        return new TransformedResponse('/**/ typeof ' . $func . ' === "function" && ' . $func . '(' . $data  . ');');
     }
 }

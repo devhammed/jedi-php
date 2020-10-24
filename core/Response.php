@@ -140,6 +140,8 @@ class Response
 
         $this->type('text/javascript');
 
+        // the /**/ is a specific security mitigation for "Rosetta Flash JSONP abuse"
+        // the typeof check is just to reduce client error noise
         return new TransformedResponse('/**/ typeof ' . $func . ' === "function" && ' . $func . '(' . $data  . ');');
     }
 }

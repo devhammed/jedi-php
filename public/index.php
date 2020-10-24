@@ -19,6 +19,10 @@ $app->use(function (Context $context, Closure $next) {
     }
 });
 
+$app->get('/', function () {
+    return '<h1>Home Page</h1>';
+});
+
 // Sample group routes
 $app->group('/api', function () use ($app) {
     // Sample middleware for groups
@@ -59,10 +63,6 @@ $app->group('/api', function () use ($app) {
             return $context->args->user;
         });
     });
-});
-
-$app->get('/', function () {
-    return '<h1>Home Page</h1>';
 });
 
 $app->get('/contact', function () {

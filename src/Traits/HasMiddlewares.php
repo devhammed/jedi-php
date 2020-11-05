@@ -52,7 +52,9 @@ trait HasMiddlewares
                     return call_user_func($middleware, $ctx, $next);
                 };
             },
-            $handler,
+            function (...$args) use ($handler) {
+                return \call_user_func_array($handler, $args);
+            },
         );
     }
 }

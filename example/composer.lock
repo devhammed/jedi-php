@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "..",
-                "reference": "43ab46f0b7057627606e8a5717ed73e79abcbd78"
+                "reference": "18338bae3dce8dc0552dbae55888a1110bc27043"
             },
             "type": "library",
             "autoload": {

@@ -15,7 +15,7 @@ class Request implements ArrayAccess
     protected array $files;
     protected array $server;
     protected array $headers;
-    protected array $params;
+    protected ?array $params;
     protected array $cookies;
 
     /**

@@ -60,7 +60,7 @@ class Request implements ArrayAccess
     /**
      * Returns route value.
      */
-    public function params(string $key = null, $default = null): ?array
+    public function params(string $key = null, $default = null)
     {
         $this->populateParams([]);
 

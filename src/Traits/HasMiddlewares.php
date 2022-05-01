@@ -2,6 +2,7 @@
 
 namespace Jedi\Traits;
 
+use Jedi\Context\Context;
 use InvalidArgumentException;
 
 trait HasMiddlewares
@@ -36,23 +37,25 @@ trait HasMiddlewares
     }
 
     /**
-     * Get the final handler function that will curry the middlewares and main handler.
+     * Call the handler function but run middlewares first.
      */
-    public function getFinalHandler(callable $handler): callable
+    protected function callHandler(Context $context, array $middlewares, callable $handler)
     {
-        return array_reduce(
-            array_reverse($this->middlewares),
+        $handler = array_reduce(
+            array_reverse($middlewares),
             function (
                 $next,
                 $middleware
-            ) {
-                return function ($ctx) use ($next, $middleware) {
-                    return call_user_func($middleware, $ctx, $next);
+            ) use ($context) {
+                return function () use ($context, $next, $middleware) {
+                    return \call_user_func($middleware, $context, $next);
                 };
             },
-            function (...$args) use ($handler) {
-                return \call_user_func_array($handler, $args);
+            function () use ($context, $handler) {
+                return \call_user_func($handler, $context);
             },
         );
+
+        return \call_user_func($handler);
     }
 }

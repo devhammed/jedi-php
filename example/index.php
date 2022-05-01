@@ -13,6 +13,7 @@ $app->use(function (Context $context, Closure $next) {
     try {
         return $next();
     } catch (\Throwable $e) {
+        error_log($e);
         return $context->response->json(
             [
                 'ok'      => false,

@@ -213,9 +213,10 @@ class Application
 
                 $this->context->request->populateParams($args);
 
-                return \call_user_func(
-                    $route->getFinalHandler($route->getHandler()),
+                return $this->callHandler(
                     $this->context,
+                    $route->getMiddlewares(),
+                    $route->getHandler(),
                 );
             }
         }

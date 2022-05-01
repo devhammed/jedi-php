@@ -115,7 +115,7 @@ class Application
      */
     public function run()
     {
-        die($this->context->response->send($this->handleRequest()));
+        echo $this->context->response->send($this->handleRequest()));
     }
 
     /**

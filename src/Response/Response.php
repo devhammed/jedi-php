@@ -3,6 +3,7 @@
 namespace Jedi\Response;
 
 use Throwable;
+use Jedi\Request\Request;
 
 class Response
 {
@@ -42,6 +43,19 @@ class Response
     public const HTTP_GATEWAY_TIMEOUT          = 504;
 
     /**
+     * Current request.
+     */
+    protected Request $request;
+
+    /**
+     * Creates a new Jedi response.
+     */
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
+
+    /**
      * Set a response header.
      */
     public function header(string $key, string $value, bool $replace = \true): self
@@ -66,11 +80,7 @@ class Response
      */
     public function back(): self
     {
-        return $this->redirect(
-            isset($_SERVER['HTTP_REFERER'])
-                ? $_SERVER['HTTP_REFERER']
-                : '#'
-        );
+        return $this->redirect($this->request->header('Referer', '#'));
     }
 
     /**
@@ -132,43 +142,44 @@ class Response
     /**
      * Send a plain text response.
      */
-    public function text($text): TransformedResponse
+    public function text($text, int $status = \null): TransformedResponse
     {
         $this->type('text/plain');
 
-        return new TransformedResponse($text);
+        return $this->send(new TransformedResponse($text), $status);
     }
 
     /**
      * Send a JSON response.
      */
-    public function json($data): TransformedResponse
+    public function json($data, int $status = \null): TransformedResponse
     {
         $this->type('application/json');
 
-        return new TransformedResponse(\json_encode($data));
+        return $this->send(new TransformedResponse(\json_encode($data)), $status);
     }
 
     /**
      * Send a JSONP response.
      */
-    public function jsonp($data, string $func = 'callback'): TransformedResponse
+    public function jsonp($data, string $func = \null, int $status = \null): TransformedResponse
     {
-        if (!isset($_GET[$func])) {
-            $this->status(self::HTTP_BAD_REQUEST);
+        $func     = $func ?? 'callback';
+        $callback = $this->request->get($func);
 
-            return '';
+        if ($callback === \null) {
+            return $this->text('', self::HTTP_BAD_REQUEST);
         }
-
-        $func = $_GET[$func];
-        $data = $this->json($data);
 
         $this->type('text/javascript');
 
         // the /**/ is a specific security mitigation for "Rosetta Flash JSONP abuse"
         // the typeof check is just to reduce client error noise
-        return new TransformedResponse(
-            '/**/ typeof ' . $func . ' === "function" && ' . $func . '(' . $data . ');'
+        return $this->send(
+            new TransformedResponse(
+                '/**/ typeof ' . $func . ' === "function" && ' . $callback . '(' . \json_encode($data) . ');'
+            ),
+            $status,
         );
     }
 }

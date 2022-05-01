@@ -1,6 +1,6 @@
 <?php
 
-namespace Jedi;
+namespace Jedi\Application;
 
 use Jedi\Traits\HasMiddlewares;
 

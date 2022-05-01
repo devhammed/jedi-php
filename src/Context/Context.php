@@ -3,15 +3,15 @@
 namespace Jedi\Context;
 
 use ArrayAccess;
-use Jedi\Application;
 use Jedi\Request\Request;
 use Jedi\Response\Response;
+use Jedi\Application\Application;
 use Jedi\Context\Exceptions\ServiceNotFoundException;
 
 /**
  * Context Class
  *
- * @property-read \Jedi\Application $app
+ * @property-read \Jedi\Application\Application $app
  * @property-read \Jedi\Request\Request $request
  * @property-read \Jedi\Response\Response $response
  */
@@ -38,7 +38,7 @@ class Context implements ArrayAccess
     {
         $this->container['app']      = $application;
         $this->container['request']  = new Request();
-        $this->container['response'] = new Response();
+        $this->container['response'] = new Response($this->request);
     }
 
     /**

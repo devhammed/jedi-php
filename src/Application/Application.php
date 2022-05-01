@@ -1,8 +1,10 @@
 <?php
 
-namespace Jedi;
+namespace Jedi\Application;
 
 use Closure;
+use Jedi\Context\Context;
+use Jedi\Response\Response;
 use Jedi\Traits\HasMiddlewares;
 
 class Application
@@ -12,7 +14,7 @@ class Application
     /**
      * Array of registered routes.
      *
-     * @var \Jedi\Route[] $routes
+     * @var Route[] $routes
      */
     protected array $routes = [];
 
@@ -37,7 +39,12 @@ class Application
     public function __construct()
     {
         $this->context  = new Context($this);
-        $this->fallback =  fn () => 'Page Not Found.';
+        $this->fallback =  function (Context $context) {
+            return $context->response->text(
+                'Cannot ' . $context->request->method() . ' ' . $context->request->uri() . '.',
+                Response::HTTP_NOT_FOUND,
+            );
+        };
     }
 
     /**
@@ -53,7 +60,7 @@ class Application
     /**
      * Register a custom not found handler.
      */
-    public function fallback(Closure $fallback): self
+    public function fallback(callable $fallback): self
     {
         $this->fallback = $fallback;
 
@@ -115,7 +122,7 @@ class Application
      */
     public function run()
     {
-        echo $this->context->response->send($this->handleRequest()));
+        echo $this->context->response->send($this->handleRequest()); // phpcs:ignore
     }
 
     /**
@@ -145,10 +152,6 @@ class Application
             }
         }
 
-        $this->context
-            ->response
-            ->status($this->context->response::HTTP_NOT_FOUND);
-
-        return \call_user_func($this->fallback);
+        return \call_user_func($this->fallback, $this->context);
     }
 }

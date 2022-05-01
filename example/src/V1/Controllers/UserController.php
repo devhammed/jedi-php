@@ -2,6 +2,8 @@
 
 namespace JediExample\V1\Controllers;
 
+use Jedi\Context\Context;
+
 class UserController
 {
     public function index()
@@ -16,5 +18,10 @@ class UserController
                 ],
             ],
         ];
+    }
+
+    public function show(Context $context)
+    {
+        return $context->request->params('id');
     }
 }

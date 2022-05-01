@@ -7,7 +7,9 @@ use Jedi\Application\Application;
 $app = new Application();
 
 $app->get('/', function () {
-    return 'Hello World.';
+    return [
+        'message' => 'Hello World!',
+    ];
 });
 
 $app->run();

@@ -62,7 +62,9 @@ class Application
      */
     public function fallback(callable $fallback): self
     {
-        $this->fallback = $fallback;
+        $this->fallback = function (Context $context) use ($fallback) {
+            return \call_user_func($fallback, $context);
+        };
 
         return $this;
     }

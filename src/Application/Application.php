@@ -84,6 +84,72 @@ class Application
     }
 
     /**
+     * Register a PUT route.
+     */
+    public function put(string $path, callable $handler): Route
+    {
+        return $this->map('PUT', $path, $handler);
+    }
+
+    /**
+     * Register a PATCH route.
+     */
+    public function patch(string $path, callable $handler): Route
+    {
+        return $this->map('PATCH', $path, $handler);
+    }
+
+    /**
+     * Register a DELETE route.
+     */
+    public function delete(string $path, callable $handler): Route
+    {
+        return $this->map('DELETE', $path, $handler);
+    }
+
+    /**
+     * Register a CRUD resource route.
+     */
+    public function resource(string $path, string $class)
+    {
+        if (!\class_exists($class)) {
+            throw new \Exception('Class ' . $class . ' does not exist.');
+        }
+
+        $instance = new $class();
+
+        if (\method_exists($instance, 'index')) {
+            $this->get($path, [$instance, 'index']);
+        }
+
+        if (\method_exists($instance, 'create')) {
+            $this->get($path . '/create', [$instance, 'create']);
+        }
+
+        if (\method_exists($instance, 'store')) {
+            $this->post($path, [$instance, 'store']);
+        }
+
+        if (\method_exists($instance, 'show')) {
+            $this->get($path . '/:id', [$instance, 'show']);
+        }
+
+        if (\method_exists($instance, 'edit')) {
+            $this->get($path . '/:id/edit', [$instance, 'edit']);
+        }
+
+        if (\method_exists($instance, 'update')) {
+            $this->map(['PUT', 'PATCH'], $path . '/:id', [$instance, 'update']);
+        }
+
+        if (\method_exists($instance, 'destroy')) {
+            $this->delete($path . '/:id', [$instance, 'destroy']);
+        }
+
+        return $this;
+    }
+
+    /**
      * Create a route group.
      */
     public function group(string $base, callable $registrar)
@@ -102,7 +168,7 @@ class Application
     /**
      * Register a route.
      */
-    public function map(string $method, string $path, callable $handler): Route
+    public function map(string|array $method, string $path, callable $handler): Route
     {
         $path = $this->base . ($path === '/' ? '' : $path);
 

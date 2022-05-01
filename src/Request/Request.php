@@ -11,7 +11,7 @@ class Request implements ArrayAccess
      */
     protected array $get;
     protected array $post;
-    protected string $uri;
+    protected string $path;
     protected array $files;
     protected array $server;
     protected array $headers;
@@ -23,14 +23,14 @@ class Request implements ArrayAccess
      */
     public function __construct()
     {
-        $this->headers   = [];
-        $this->get       = $_GET; // phpcs:ignore
-        $this->params    = \null;
-        $this->post      = $_POST; // phpcs:ignore
-        $this->files     = $_FILES;
-        $this->server    = $_SERVER;
-        $this->cookies   = $_COOKIE; // phpcs:ignore
-        $this->uri       = \strtok($this->server['REQUEST_URI'], '?');
+        $this->headers    = [];
+        $this->get        = $_GET; // phpcs:ignore
+        $this->params     = \null;
+        $this->post       = $_POST; // phpcs:ignore
+        $this->files      = $_FILES;
+        $this->server     = $_SERVER;
+        $this->cookies    = $_COOKIE; // phpcs:ignore
+        $this->path       = \strtok($this->server['REQUEST_URI'], '?');
 
         foreach ($this->server as $k => $v) {
             if (\substr($k, 0, 5) === 'HTTP_') {
@@ -204,13 +204,13 @@ class Request implements ArrayAccess
     }
 
     /**
-     * Get the current request URI.
+     * Get the current request path.
      *
      * @return string
      */
-    public function uri(): string
+    public function path(): string
     {
-        return $this->uri;
+        return $this->path;
     }
 
     /**

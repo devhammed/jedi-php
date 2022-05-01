@@ -41,7 +41,7 @@ class Application
         $this->context  = new Context($this);
         $this->fallback =  function (Context $context) {
             return $context->response->text(
-                'Cannot ' . $context->request->method() . ' ' . $context->request->uri() . '.',
+                'Cannot ' . $context->request->method() . ' ' . $context->request->path() . '.',
                 Response::HTTP_NOT_FOUND,
             );
         };
@@ -130,7 +130,7 @@ class Application
      */
     protected function handleRequest()
     {
-        $requestPath   = $this->context->request->uri();
+        $requestPath   = $this->context->request->path();
         $requestMethod = $this->context->request->method();
 
         foreach ($this->routes as $route) {

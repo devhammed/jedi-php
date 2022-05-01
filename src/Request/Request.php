@@ -35,7 +35,7 @@ class Request implements ArrayAccess
         foreach ($this->server as $k => $v) {
             if (\substr($k, 0, 5) === 'HTTP_') {
                 $k                  = \str_replace('_', '-', \substr($k, 5));
-                $$this->headers[$k] = $v;
+                $this->headers[$k]  = $v;
             } elseif ($k === 'CONTENT_TYPE' || $k === 'CONTENT_LENGTH') {
                 $k                 = \str_replace('_', '-', $k);
                 $this->headers[$k] = $v;

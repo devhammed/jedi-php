@@ -156,7 +156,7 @@ class Response
     {
         $this->type('application/json');
 
-        return $this->send(new TransformedResponse(\json_encode($data)), $status);
+        return $this->send(new TransformedResponse(\json_encode($data)), $status); // phpcs:ignore
     }
 
     /**
@@ -177,7 +177,7 @@ class Response
         // the typeof check is just to reduce client error noise
         return $this->send(
             new TransformedResponse(
-                '/**/ typeof ' . $func . ' === "function" && ' . $callback . '(' . \json_encode($data) . ');'
+                '/**/ typeof ' . $func . ' === "function" && ' . $callback . '(' . \json_encode($data) . ');' // phpcs:ignore
             ),
             $status,
         );

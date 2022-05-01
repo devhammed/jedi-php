@@ -1,0 +1,31 @@
+{
+  "name": "devhammed/jedi-php-example",
+  "description": "Jedi PHP Example Project.",
+  "type": "project",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "JediExample\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Hammed Oyedele",
+      "email": "itz.harmid@gmail.com"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "..",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "require": {
+    "devhammed/jedi-php": "@dev"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

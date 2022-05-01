@@ -86,7 +86,7 @@ class Request implements ArrayAccess
     /**
      * Returns GET value.
      */
-    public function get(string $key = \null, $default = \null): ?string
+    public function get(string $key = \null, $default = \null)
     {
         if (\is_null($key)) {
             return $this->get;
@@ -98,7 +98,7 @@ class Request implements ArrayAccess
     /**
      * Returns POST value.
      */
-    public function post(string $key = \null, $default = \null): ?string
+    public function post(string $key = \null, $default = \null)
     {
         if (\is_null($key)) {
             return $this->post;
@@ -110,7 +110,7 @@ class Request implements ArrayAccess
     /**
      * Returns PUT value.
      */
-    public function put(string $key = \null, $default = \null): ?string
+    public function put(string $key = \null, $default = \null)
     {
         return $this->method('PUT') ? $this->raw($key) : $default;
     }
@@ -118,7 +118,7 @@ class Request implements ArrayAccess
     /**
      * Returns PATCH value.
      */
-    public function patch(string $key = \null, $default = \null): ?string
+    public function patch(string $key = \null, $default = \null)
     {
         return $this->method('PATCH') ? $this->raw($key) : $default;
     }
@@ -126,7 +126,7 @@ class Request implements ArrayAccess
     /**
      * Returns DELETE value.
      */
-    public function delete(string $key = \null, $default = \null): ?string
+    public function delete(string $key = \null, $default = \null)
     {
         return $this->method('DELETE') ? $this->raw($key) : $default;
     }
@@ -134,7 +134,7 @@ class Request implements ArrayAccess
     /**
      * Returns raw request value.
      */
-    public function raw(string $key = null, $default = null): ?string
+    public function raw(string $key = null, $default = null)
     {
         $input = \file_get_contents('php://input'); // phpcs:ignore
 
@@ -150,7 +150,7 @@ class Request implements ArrayAccess
     /**
      * Returns SERVER value.
      */
-    public function server(string $key = \null, ?string $default = \null): ?string
+    public function server(string $key = \null, ?string $default = \null)
     {
         if (\is_null($key)) {
             return $this->server;
@@ -162,7 +162,7 @@ class Request implements ArrayAccess
     /**
      * Returns value from either Route Arguments, GET, POST, PUT, PATCH, DELETE, COOKIES, SERVER and RAW (first to match in that order).
      */
-    public function input(string $key, $default = \null): ?string
+    public function input(string $key, $default = \null)
     {
         if (($v = $this->params($key, $default))) {
             return $v;
@@ -228,7 +228,7 @@ class Request implements ArrayAccess
     /**
      * Get the current request method.
      */
-    public function method(string $type = \null): string
+    public function method(string $type = \null)
     {
         $verb = \strtoupper($this->server('REQUEST_METHOD'));
 

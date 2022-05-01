@@ -53,7 +53,7 @@ class Request implements ArrayAccess
     public function populateParams(array $params = []): void
     {
         if (\is_null($this->params)) {
-            $this->$params = $params;
+            $this->params = $params;
         }
     }
 

@@ -30,7 +30,7 @@ class Route
     /**
      * Creates a new Jedi Route instance.
      */
-    public function __construct(string $method, string $path, callable $handler)
+    public function __construct(string|array $method, string $path, callable $handler)
     {
         $this->path = \preg_replace_callback(
             '#:([\w]+)(\(([^/()]*)\))?#',
@@ -42,7 +42,7 @@ class Route
             '~^' . $path . '/?$~',
         );
 
-        $this->methods = \array_map(
+        $this->methods = \is_array($method) ? $method : \array_map(
             'trim',
             \array_map(
                 'strtoupper',

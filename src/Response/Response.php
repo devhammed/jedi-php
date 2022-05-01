@@ -1,18 +1,45 @@
 <?php
 
-namespace Jedi;
+namespace Jedi\Response;
 
 use Throwable;
-use Jedi\Response\TransformedResponse;
 
 class Response
 {
     /**
      * HTTP Status Codes.
      */
-    public const HTTP_OK = 200;
-    public const HTTP_NOT_FOUND = 404;
-    public const HTTP_INTERNAL_SERVER_ERROR = 500;
+    public const HTTP_OK                       = 200;
+    public const HTTP_CREATED                  = 201;
+    public const HTTP_ACCEPTED                 = 202;
+    public const HTTP_NO_CONTENT               = 204;
+    public const HTTP_MOVED_PERMANENTLY        = 301;
+    public const HTTP_FOUND                    = 302;
+    public const HTTP_SEE_OTHER                = 303;
+    public const HTTP_NOT_MODIFIED             = 304;
+    public const HTTP_TEMPORARY_REDIRECT       = 307;
+    public const HTTP_PERMANENT_REDIRECT       = 308;
+    public const HTTP_BAD_REQUEST              = 400;
+    public const HTTP_UNAUTHORIZED             = 401;
+    public const HTTP_FORBIDDEN                = 403;
+    public const HTTP_NOT_FOUND                = 404;
+    public const HTTP_METHOD_NOT_ALLOWED       = 405;
+    public const HTTP_NOT_ACCEPTABLE           = 406;
+    public const HTTP_REQUEST_TIMEOUT          = 408;
+    public const HTTP_CONFLICT                 = 409;
+    public const HTTP_GONE                     = 410;
+    public const HTTP_LENGTH_REQUIRED          = 411;
+    public const HTTP_PRECONDITION_FAILED      = 412;
+    public const HTTP_REQUEST_ENTITY_TOO_LARGE = 413;
+    public const HTTP_REQUEST_URI_TOO_LONG     = 414;
+    public const HTTP_UNSUPPORTED_MEDIA_TYPE   = 415;
+    public const HTTP_I_AM_A_TEAPOT            = 418;
+    public const HTTP_UNPROCESSABLE_ENTITY     = 422;
+    public const HTTP_INTERNAL_SERVER_ERROR    = 500;
+    public const HTTP_NOT_IMPLEMENTED          = 501;
+    public const HTTP_BAD_GATEWAY              = 502;
+    public const HTTP_SERVICE_UNAVAILABLE      = 503;
+    public const HTTP_GATEWAY_TIMEOUT          = 504;
 
     /**
      * Set a response header.
@@ -31,9 +58,7 @@ class Response
      */
     public function redirect(string $url): self
     {
-        $this->header('Location', $url);
-
-        return $this;
+        return $this->header('Location', $url);
     }
 
     /**
@@ -41,13 +66,11 @@ class Response
      */
     public function back(): self
     {
-        $this->redirect(
+        return $this->redirect(
             isset($_SERVER['HTTP_REFERER'])
                 ? $_SERVER['HTTP_REFERER']
                 : '#'
         );
-
-        return $this;
     }
 
     /**
@@ -132,7 +155,9 @@ class Response
     public function jsonp($data, string $func = 'callback'): TransformedResponse
     {
         if (!isset($_GET[$func])) {
-            return 'No JSONP Callback `' . $func . '`';
+            $this->status(self::HTTP_BAD_REQUEST);
+
+            return '';
         }
 
         $func = $_GET[$func];
@@ -142,6 +167,8 @@ class Response
 
         // the /**/ is a specific security mitigation for "Rosetta Flash JSONP abuse"
         // the typeof check is just to reduce client error noise
-        return new TransformedResponse('/**/ typeof ' . $func . ' === "function" && ' . $func . '(' . $data  . ');');
+        return new TransformedResponse(
+            '/**/ typeof ' . $func . ' === "function" && ' . $func . '(' . $data . ');'
+        );
     }
 }

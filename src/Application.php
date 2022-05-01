@@ -36,7 +36,7 @@ class Application
      */
     public function __construct()
     {
-        $this->context = new Context($this);
+        $this->context  = new Context($this);
         $this->fallback =  fn () => 'Page Not Found.';
     }
 
@@ -69,14 +69,6 @@ class Application
     }
 
     /**
-     * Register a GET view route.
-     */
-    public function getView(string $path, string $view): Route
-    {
-        return $this->view('GET', $path, $view);
-    }
-
-    /**
      * Register a POST route.
      */
     public function post(string $path, callable $handler): Route
@@ -85,37 +77,19 @@ class Application
     }
 
     /**
-     * Register a POST view route.
-     */
-    public function postView(string $path, string $view): Route
-    {
-        return $this->view('POST', $path, $view);
-    }
-
-    /**
      * Create a route group.
      */
     public function group(string $base, callable $registrar)
     {
-        $oldBase = $this->base;
+        $oldBase        = $this->base;
         $oldMiddlewares = $this->middlewares;
 
         $this->base = $oldBase . $base;
 
         \call_user_func($registrar, $this);
 
-        $this->base = $oldBase;
+        $this->base        = $oldBase;
         $this->middlewares = $oldMiddlewares;
-    }
-
-    /**
-     * Register a view route.
-     */
-    public function view(string $method, string $path, string $view): Route
-    {
-        return $this->map($method, $path, function () use ($view) {
-            return $view;
-        });
     }
 
     /**
@@ -125,7 +99,7 @@ class Application
     {
         $path = $this->base . ($path === '/' ? '' : $path);
 
-        $method = $method === 'GET' ? 'GET|HEAD' : $method;
+        $method = $method === 'GET' ? ['GET', 'HEAD'] : $method;
 
         $route = new Route($method, $path, $handler);
 
@@ -141,7 +115,7 @@ class Application
      */
     public function run()
     {
-        echo $this->context->response->send($this->handleRequest());
+        die($this->context->response->send($this->handleRequest()));
     }
 
     /**
@@ -149,11 +123,11 @@ class Application
      */
     protected function handleRequest()
     {
-        $requestPath = $this->context->request->uri();
+        $requestPath   = $this->context->request->uri();
         $requestMethod = $this->context->request->method();
 
         foreach ($this->routes as $route) {
-            $routeMethods = $route->getMethods();
+            $routeMethods  = $route->getMethods();
             $matchedMethod = \in_array('ANY', $routeMethods) || \in_array($requestMethod, $routeMethods);
 
             if (
@@ -162,13 +136,10 @@ class Application
             ) {
                 \array_shift($args);
 
-                $this->context->args->setArgs($args);
+                $this->context->request->populateParams($args);
 
                 return \call_user_func(
-                    $this->getFinalHandler(
-                        $route->getMiddlewares(),
-                        $route->getHandler(),
-                    ),
+                    $route->getFinalHandler($route->getHandler()),
                     $this->context,
                 );
             }

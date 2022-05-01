@@ -1,20 +1,19 @@
 <?php
 
-namespace Jedi;
+namespace Jedi\Context;
 
 use ArrayAccess;
-use Jedi\Exceptions\Context\NotFoundException;
+use Jedi\Application;
+use Jedi\Request\Request;
+use Jedi\Response\Response;
+use Jedi\Context\Exceptions\ServiceNotFoundException;
 
 /**
  * Context Class
  *
  * @property-read \Jedi\Application $app
- * @property-read \Jedi\Router $router
- * @property-read \Jedi\Arguments $args
- * @property-read \Jedi\Request $request
- * @property-read \Jedi\Response $response
- * @property-read \Jedi\Request $req
- * @property-read \Jedi\Response $res
+ * @property-read \Jedi\Request\Request $request
+ * @property-read \Jedi\Response\Response $response
  */
 class Context implements ArrayAccess
 {
@@ -28,10 +27,6 @@ class Context implements ArrayAccess
      */
     private array $builtin = [
         'app',
-        'res',
-        'req',
-        'args',
-        'router',
         'request',
         'response',
     ];
@@ -41,12 +36,9 @@ class Context implements ArrayAccess
      */
     public function __construct(Application $application)
     {
-        $this->container['app'] = $application;
-        $this->container['args'] = new Arguments();
-        $this->container['request'] = new Request();
+        $this->container['app']      = $application;
+        $this->container['request']  = new Request();
         $this->container['response'] = new Response();
-        $this->container['req'] = $this->container['request'];
-        $this->container['res'] = $this->container['response'];
     }
 
     /**
@@ -55,33 +47,31 @@ class Context implements ArrayAccess
     public function offsetGet($offset)
     {
         if (!isset($this->container[$offset])) {
-            throw new NotFoundException(sprintf(
+            throw new ServiceNotFoundException(sprintf(
                 'Container key "%s" is not defined',
                 $offset,
             ));
         }
 
-        $value = $this->container[$offset];
-
-        return \is_callable($value) ? \call_user_func($value, $this) : $value;
+        return $this->maybeCallable($this->container[$offset]);
     }
 
     /**
      * Register a service.
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         if ($this->isBuiltin($offset)) {
             return;
         }
 
-        $this->container[$offset] = $value;
+        $this->container[$offset] = $this->maybeCallable($value);
     }
 
     /**
      * Check if service exists in container.
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return isset($this->container[$offset]);
     }
@@ -89,7 +79,7 @@ class Context implements ArrayAccess
     /**
      * Delete an argument (noop)
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         if ($this->isBuiltin($offset)) {
             return;
@@ -104,6 +94,14 @@ class Context implements ArrayAccess
     protected function isBuiltin($name): bool
     {
         return \in_array($name, $this->builtin);
+    }
+
+    /**
+     * Call a callable value if it is one.
+     */
+    protected function maybeCallable($value)
+    {
+        return \is_callable($value) ? \call_user_func($value, $this) : $value;
     }
 
     /**

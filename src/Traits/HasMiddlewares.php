@@ -38,12 +38,10 @@ trait HasMiddlewares
     /**
      * Get the final handler function that will curry the middlewares and main handler.
      */
-    protected function getFinalHandler(
-        array $middlewares,
-        callable $handler
-    ): callable {
+    protected function getFinalHandler(callable $handler): callable
+    {
         return array_reduce(
-            array_reverse($middlewares),
+            array_reverse($this->middlewares),
             function (
                 $next,
                 $middleware
